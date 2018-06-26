@@ -18,7 +18,7 @@ Citizen.CreateThread(function()
 	while true do
 		Citizen.Wait(10)
 
-		if IsControlPressed(0, 178)--[[ INPUT_PHONE ]] then
+		if IsControlPressed(0, 178) then
 			if not listOn then
 				local players = {}
 				ptable = GetPlayers()
@@ -29,7 +29,8 @@ Citizen.CreateThread(function()
 				if Faketimer >= 2 then
 					ESX.TriggerServerCallback('scoreboard:getScoreboard', function(ems, police, taxi, mek, bil, maklare, spelare)
 
-						SendNUIMessage({ text = table.concat(players), 
+						SendNUIMessage({
+							text = table.concat(players),
 							ems = ems,
 							police = police,
 							taxi = taxi,
@@ -37,7 +38,7 @@ Citizen.CreateThread(function()
 							bil = bil,
 							maklare = maklare,
 							spelare = spelare
-						)
+						})
 					end)
 					Faketimer = 0
 				else
@@ -61,9 +62,9 @@ Citizen.CreateThread(function()
 	end
 end)
 
-Citizen.CreateThread(function() -- Thread for  timer
+Citizen.CreateThread(function() -- Thread for timer
 	while true do 
-		Citizen.Wait(1000)
+		Citizen.Wait(5000)
 		Faketimer = Faketimer + 1
 	end
 end)
