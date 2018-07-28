@@ -1,5 +1,7 @@
 local listOn = false
-local Faketimer = 0
+local faketimer = 0
+local connectedPlayers = {}
+local formattedPlayerList = {}
 ESX = nil
 
 Citizen.CreateThread(function()
@@ -7,11 +9,24 @@ Citizen.CreateThread(function()
 		TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 		Citizen.Wait(0)
 	end
+
+	Citizen.Wait(2000)
+	ESX.TriggerServerCallback('scoreboard:getPlayers', function(playerTable)
+		connectedPlayers = playerTable
+		UpdatePlayerTable()
+	end)
+end)
+
+RegisterNetEvent('scoreboard:updatePlayers')
+AddEventHandler('scoreboard:updatePlayers', function(playerTable)
+	connectedPlayers = playerTable
+
+	UpdatePlayerTable()
 end)
 
 Citizen.CreateThread(function()
-	if Faketimer >= 3 then
-		Faketimer = 0
+	if faketimer >= 3 then
+		faketimer = 0
 	end
 
 	listOn = false
@@ -20,17 +35,12 @@ Citizen.CreateThread(function()
 
 		if IsControlPressed(0, 178) then
 			if not listOn then
-				local players = {}
-				ptable = GetPlayers()
-				for _, i in ipairs(ptable) do
-					table.insert(players, 
-					'<tr style=\"color: rgb(' .. 255 .. ', ' .. 255 .. ', ' .. 255 .. ')\"><td>' .. GetPlayerServerId(i) .. '</td><td>' .. GetPlayerName(i) .. '</td></tr>')
-				end
-				if Faketimer >= 2 then
+
+				if faketimer >= 2 then
 					ESX.TriggerServerCallback('scoreboard:getScoreboard', function(ems, police, taxi, mek, bil, maklare, spelare)
 
 						SendNUIMessage({
-							text = table.concat(players),
+							text = table.concat(formattedPlayerList),
 							ems = ems,
 							police = police,
 							taxi = taxi,
@@ -40,16 +50,17 @@ Citizen.CreateThread(function()
 							spelare = spelare
 						})
 					end)
-					Faketimer = 0
+					faketimer = 0
 				else
-					SendNUIMessage({ text = table.concat(players)})
-					Faketimer = 0
+					SendNUIMessage({ text = table.concat(formattedPlayerList)})
+					faketimer = 0
 				end
 
 				listOn = true
+
 				while listOn do
 					Citizen.Wait(10)
-					if(IsControlPressed(0, 178) == false) then
+					if IsControlPressed(0, 178) == false then
 						listOn = false
 						SendNUIMessage({
 							meta = 'close'
@@ -62,21 +73,17 @@ Citizen.CreateThread(function()
 	end
 end)
 
+function UpdatePlayerTable()
+	formattedPlayerList = {}
+
+	for k,v in pairs(connectedPlayers) do
+		table.insert(formattedPlayerList, '<tr style=\"color: rgb(' .. 255 .. ', ' .. 255 .. ', ' .. 255 .. ')\"><td>' .. k .. '</td><td>' .. v.name .. '</td></tr>')
+	end
+end
+
 Citizen.CreateThread(function() -- Thread for timer
 	while true do 
 		Citizen.Wait(5000)
-		Faketimer = Faketimer + 1
+		faketimer = faketimer + 1
 	end
 end)
-
-function GetPlayers()
-	local players = {}
-
-	for i = 0, 32 do
-		if NetworkIsPlayerActive(i) then
-			table.insert(players, i)
-		end
-	end
-
-	return players
-end

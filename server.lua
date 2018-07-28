@@ -1,4 +1,5 @@
 ESX = nil
+local connectedPlayers = {}
 
 TriggerEvent('esx:getSharedObject', function(obj) ESX = obj end)
 
@@ -38,3 +39,76 @@ ESX.RegisterServerCallback('scoreboard:getScoreboard', function(source, cb)
 	cb(CountJobs())
 end)
 
+ESX.RegisterServerCallback('scoreboard:getPlayers', function(source, cb)
+	cb(connectedPlayers)
+end)
+
+AddEventHandler('esx:playerLoaded', function(player)
+	connectedPlayers[player] = {}
+	local identifier = GetPlayerIdentifiers(player)[1]
+
+	MySQL.Async.fetchAll('SELECT firstname, lastname FROM users WHERE identifier = @identifier', {
+		['@identifier'] = identifier
+	}, function (result)
+
+		if result[1] and result[1].firstname and result[1].lastname then
+			connectedPlayers[player].name = result[1].firstname .. ' ' .. result[1].lastname
+			TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
+		else
+			connectedPlayers[player].name = GetPlayerName(player)
+			TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
+		end
+
+	end)
+
+end)
+
+AddEventHandler('esx:playerDropped', function(reason)
+	connectedPlayers[source] = nil
+
+	TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
+end)
+
+AddEventHandler('onResourceStart', function(resource)
+	if resource == GetCurrentResourceName() then
+
+		Citizen.CreateThread(function()
+			Citizen.Wait(1000)
+			ForceCountPlayers()
+		end)
+		
+	end
+end)
+
+function ForceCountPlayers()
+	local xPlayers = ESX.GetPlayers()
+	local player
+
+	for i=1, #xPlayers, 1 do
+		player = xPlayers[i]
+
+		connectedPlayers[player] = {}
+		local identifier = GetPlayerIdentifiers(player)[1]
+
+		MySQL.Async.fetchAll('SELECT firstname, lastname FROM users WHERE identifier = @identifier', {
+			['@identifier'] = identifier
+		}, function (result)
+
+			if result[1] and result[1].firstname and result[1].lastname then
+				connectedPlayers[player].name = result[1].firstname .. ' ' .. result[1].lastname
+			else
+				connectedPlayers[player].name = GetPlayerName(player)
+			end
+	
+		end)
+
+		-- await!
+		while connectedPlayers[player].name == nil do
+			Citizen.Wait(1)
+		end
+
+	end
+
+	TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
+
+end
