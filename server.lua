@@ -63,8 +63,8 @@ AddEventHandler('esx:playerLoaded', function(player)
 
 end)
 
-AddEventHandler('esx:playerDropped', function(reason)
-	connectedPlayers[source] = nil
+AddEventHandler('esx:playerDropped', function(playerID)
+	connectedPlayers[playerID] = nil
 
 	TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
 end)
