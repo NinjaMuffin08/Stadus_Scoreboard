@@ -47,15 +47,18 @@ AddEventHandler('esx:playerLoaded', function(player)
 	connectedPlayers[player] = {}
 	local identifier = GetPlayerIdentifiers(player)[1]
 
-	MySQL.Async.fetchAll('SELECT firstname, lastname FROM users WHERE identifier = @identifier', {
+	MySQL.Async.fetchAll('SELECT firstname, lastname, name FROM users WHERE identifier = @identifier', {
 		['@identifier'] = identifier
 	}, function (result)
 
-		if result[1] and result[1].firstname and result[1].lastname then
+		if result[1].firstname and result[1].lastname then
 			connectedPlayers[player].name = result[1].firstname .. ' ' .. result[1].lastname
 			TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
+		elseif result[1].name then
+			connectedPlayers[player].name = result[1].name
+			TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
 		else
-			connectedPlayers[player].name = GetPlayerName(player)
+			connectedPlayers[player].name = 'Unknown player name'
 			TriggerClientEvent('scoreboard:updatePlayers', -1, connectedPlayers)
 		end
 
@@ -90,14 +93,16 @@ function ForceCountPlayers()
 		connectedPlayers[player] = {}
 		local identifier = GetPlayerIdentifiers(player)[1]
 
-		MySQL.Async.fetchAll('SELECT firstname, lastname FROM users WHERE identifier = @identifier', {
+		MySQL.Async.fetchAll('SELECT firstname, lastname, name FROM users WHERE identifier = @identifier', {
 			['@identifier'] = identifier
 		}, function (result)
 
-			if result[1] and result[1].firstname and result[1].lastname then
+			if result[1].firstname and result[1].lastname then
 				connectedPlayers[player].name = result[1].firstname .. ' ' .. result[1].lastname
+			elseif result[1].name then
+				connectedPlayers[player].name = result[1].name
 			else
-				connectedPlayers[player].name = GetPlayerName(player)
+				connectedPlayers[player].name = 'Unknown player name'
 			end
 	
 		end)
