@@ -49,7 +49,7 @@ Citizen.CreateThread(function()
 			if not listOn then
 
 				if faketimer >= 2 then
-					ESX.TriggerServerCallback('scoreboard:getScoreboard', function(ems, police, taxi, mek, bil, maklare, spelare)
+					ESX.TriggerServerCallback('scoreboard:getScoreboard', function(ems, police, taxi, mek, bil, maklare, carthief, spelare)
 
 						SendNUIMessage({
 							text = table.concat(formattedPlayerList),
@@ -59,6 +59,7 @@ Citizen.CreateThread(function()
 							mek = mek,
 							bil = bil,
 							maklare = maklare,
+							carthief = carthief,
 							spelare = spelare
 						})
 					end)
@@ -89,6 +90,10 @@ function UpdatePlayerTable()
 	formattedPlayerList = {}
 
 	for k,v in pairs(connectedPlayers) do
+		if v.name == nil or v.name == '' then
+			v.name = '(Unknown player name)'
+		end
+
 		table.insert(formattedPlayerList, '<tr style=\"color: rgb(' .. 255 .. ', ' .. 255 .. ', ' .. 255 .. ')\"><td>' .. k .. '</td><td>' .. v.name .. '</td></tr>')
 	end
 end

@@ -11,6 +11,7 @@ $(function()
 		$('#mecano').html(event.data.mek);
 		$('#bil').html(event.data.bil);
 		$('#maklare').html(event.data.maklare);
+		$('#carthief').html(event.data.carthief);
 		$('#spelare').html(event.data.spelare);
 		
 		buf.find('table').append("<tr class=\"heading\"><th>ID</th><th>Name</th></tr>");

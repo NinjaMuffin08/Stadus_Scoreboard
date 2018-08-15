@@ -10,13 +10,15 @@ function CountJobs()
 	local MekConnected = 0
 	local BilConnected = 0
 	local MaklareConnected = 0
+	local CarThiefConnected = 0
 	local PlayerConnected = 0
 
 	local xPlayers = ESX.GetPlayers()
 	for i=1, #xPlayers, 1 do
+
 		local xPlayer = ESX.GetPlayerFromId(xPlayers[i])
-		
 		PlayerConnected = PlayerConnected + 1
+
 		if xPlayer.job.name == 'ambulance' then
 			EMSConnected = EMSConnected + 1
 		elseif xPlayer.job.name == 'police' then
@@ -29,10 +31,12 @@ function CountJobs()
 			BilConnected = BilConnected + 1
 		elseif xPlayer.job.name == 'realestateagent' then
 			MaklareConnected = MaklareConnected + 1
+		elseif xPlayer.job.name == 'carthief' then
+			CarThiefConnected = CarThiefConnected + 1
 		end
 	end
 
-	return EMSConnected, PoliceConnected, TaxiConnected, MekConnected, BilConnected, MaklareConnected, PlayerConnected
+	return EMSConnected, PoliceConnected, TaxiConnected, MekConnected, BilConnected, MaklareConnected, CarThiefConnected, PlayerConnected
 end
 
 ESX.RegisterServerCallback('scoreboard:getScoreboard', function(source, cb)
